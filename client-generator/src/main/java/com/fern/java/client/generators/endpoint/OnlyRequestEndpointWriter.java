@@ -176,7 +176,7 @@ public final class OnlyRequestEndpointWriter extends AbstractEndpointWriter {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         if (sdkRequestBodyType != null) {
-            sdkRequestBodyType.visit(new RequestBodyInitializer(builder, generatedObjectMapper));
+            sdkRequestBodyType.visit(new RequestBodyInitializer(builder, generatedObjectMapper, endpoint));
 
             builder.add("$T $L = new $T.Builder()\n", Request.class, getOkhttpRequestName(), Request.class)
                     .indent()
@@ -222,7 +222,7 @@ public final class OnlyRequestEndpointWriter extends AbstractEndpointWriter {
             SdkRequestBodyType.typeReference(HttpRequestBodyReference.builder()
                             .requestBodyType(TypeReference.unknown())
                             .build())
-                    .visit(new RequestBodyInitializer(builder, generatedObjectMapper));
+                    .visit(new RequestBodyInitializer(builder, generatedObjectMapper, endpoint));
             builder.add("$T $L = new $T.Builder()\n", Request.class, getOkhttpRequestName(), Request.class)
                     .indent()
                     .add(".url(")
@@ -247,15 +247,20 @@ public final class OnlyRequestEndpointWriter extends AbstractEndpointWriter {
 
         private final CodeBlock.Builder codeBlock;
         private final GeneratedObjectMapper generatedObjectMapper;
+        private final HttpEndpoint endpoint;
 
-        private RequestBodyInitializer(CodeBlock.Builder codeBlock, GeneratedObjectMapper generatedObjectMapper) {
+        private RequestBodyInitializer(CodeBlock.Builder codeBlock, GeneratedObjectMapper generatedObjectMapper, HttpEndpoint endpoint) {
             this.codeBlock = codeBlock;
             this.generatedObjectMapper = generatedObjectMapper;
+            this.endpoint = endpoint;
         }
 
         @Override
         public Void visitTypeReference(HttpRequestBodyReference _typeReference) {
             boolean isOptional = false;
+            if (this.endpoint.getRequestBody().isPresent()) {
+                    isOptional = this.endpoint.getRequestBody().get().visit(new HttpRequestBodyIsOptional());
+            }
             codeBlock
                     .addStatement("$T $L", RequestBody.class, getOkhttpRequestBodyName())
                     .beginControlFlow("try");
