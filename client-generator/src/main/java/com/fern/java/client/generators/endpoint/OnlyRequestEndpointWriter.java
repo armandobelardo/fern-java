@@ -255,9 +255,21 @@ public final class OnlyRequestEndpointWriter extends AbstractEndpointWriter {
 
         @Override
         public Void visitTypeReference(HttpRequestBodyReference _typeReference) {
+            boolean isOptional = false;
             codeBlock
                     .addStatement("$T $L", RequestBody.class, getOkhttpRequestBodyName())
-                    .beginControlFlow("try")
+                    .beginControlFlow("try");
+
+            if (isOptional) {
+                    codeBlock
+                            .addStatement(
+                                    "$L = $T.create(\"\", null)",
+                                    getOkhttpRequestBodyName(),
+                                    RequestBody.class
+                            )
+                            .beginControlFlow("if ($N.isPresent())", "request");
+            }
+            codeBlock
                     .addStatement(
                             "$L = $T.create($T.$L.writeValueAsBytes($L), $T.$L)",
                             getOkhttpRequestBodyName(),
@@ -267,7 +279,12 @@ public final class OnlyRequestEndpointWriter extends AbstractEndpointWriter {
                             "request",
                             clientGeneratorContext.getPoetClassNameFactory().getMediaTypesClassName(),
                             CoreMediaTypesGenerator.APPLICATION_JSON_FIELD_CONSTANT)
-                    .endControlFlow()
+                    .endControlFlow();
+            if (isOptional) {
+                    codeBlock.endControlFlow();
+
+            }
+            codeBlock
                     .beginControlFlow("catch($T e)", Exception.class)
                     .addStatement("throw new $T(e)", RuntimeException.class)
                     .endControlFlow();

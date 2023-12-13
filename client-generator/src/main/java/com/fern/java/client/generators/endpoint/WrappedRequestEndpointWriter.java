@@ -265,14 +265,14 @@ public final class WrappedRequestEndpointWriter extends AbstractEndpointWriter {
             GeneratedObjectMapper generatedObjectMapper,
             String variableToJsonify,
             CodeBlock.Builder requestBodyCodeBlock) {
-        requestBodyCodeBlock
-                .addStatement("$T $L", RequestBody.class, getOkhttpRequestBodyName())
-                .beginControlFlow("try");
-
-        var isOptional = false;
+        boolean isOptional = false;
         if (this.httpEndpoint.getRequestBody().isPresent()) {
                 isOptional = this.httpEndpoint.getRequestBody().get().visit(new HttpRequestBodyIsOptional());
         }
+
+        requestBodyCodeBlock
+                .addStatement("$T $L", RequestBody.class, getOkhttpRequestBodyName())
+                .beginControlFlow("try");
         if (isOptional) {
                 // Set a default empty response body and begin a conditional, prior to parsing the RequestBody
                 requestBodyCodeBlock
@@ -281,7 +281,7 @@ public final class WrappedRequestEndpointWriter extends AbstractEndpointWriter {
                                 getOkhttpRequestBodyName(),
                                 RequestBody.class
                         )
-                        .beginControlFlow("if ($N.isPresent())", getOkhttpRequestBodyName());
+                        .beginControlFlow("if ($N.isPresent())", variableToJsonify);
         }
         requestBodyCodeBlock
                 .addStatement(
