@@ -34,12 +34,15 @@ public final class KeyWordUtils {
             "assert",
             "switch");
 
+    private static final Set<String> RESERVED_METHOD_NAMES = Set.of(
+            "getClass");
+
     private KeyWordUtils() {
     }
 
-    public static String getKeyWordCompatibleFunctionName(String name, String funcName) {
-        if (isReserved(name.toLowerCase())) {
-            return "_" + funcName;
+    public static String getKeyWordCompatibleMethodName(String funcName) {
+        if (isReservedFunctionName(funcName)) {
+            return funcName + "_";
         }
         return funcName;
     }
@@ -53,5 +56,9 @@ public final class KeyWordUtils {
 
     public static boolean isReserved(String value) {
         return RESERVED_WORDS.contains(value.toLowerCase());
+    }
+
+    public static boolean isReservedFunctionName(String value) {
+        return RESERVED_METHOD_NAMES.contains(value);
     }
 }

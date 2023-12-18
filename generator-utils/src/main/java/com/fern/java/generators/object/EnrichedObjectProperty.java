@@ -66,7 +66,7 @@ public interface EnrichedObjectProperty {
     @Value.Lazy
     default MethodSpec getterProperty() {
         MethodSpec.Builder getterBuilder = MethodSpec
-                .methodBuilder(KeyWordUtils.getKeyWordCompatibleFunctionName(pascalCaseKey(), "get" + pascalCaseKey()))
+                .methodBuilder(KeyWordUtils.getKeyWordCompatibleMethodName("get" + pascalCaseKey()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(poetTypeName());
         if (literalValue().isPresent()) {
