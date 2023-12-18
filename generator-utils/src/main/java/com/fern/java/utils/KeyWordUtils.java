@@ -34,7 +34,15 @@ public final class KeyWordUtils {
             "assert",
             "switch");
 
-    private KeyWordUtils() {}
+    private KeyWordUtils() {
+    }
+
+    public static String getKeyWordCompatibleFunctionName(String name, String funcName) {
+        if (isReserved(name.toLowerCase())) {
+            return "_" + funcName;
+        }
+        return funcName;
+    }
 
     public static String getKeyWordCompatibleName(String name) {
         if (isReserved(name.toLowerCase())) {
